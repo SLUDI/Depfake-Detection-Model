@@ -79,17 +79,17 @@ def main():
     client = DeepfakeDetectionClient()
     
     # Check health
-    print("🏥 Checking API health...")
+    print("Checking API health...")
     health = client.health_check()
     print(f"   Status: {health['status']}")
     print(f"   Model: {health.get('model_loaded', 'Unknown')}")
     print()
     
     # Detect deepfake
-    print(f"🔍 Analyzing image: {image_path}")
+    print(f"Analyzing image: {image_path}")
     result = client.detect_deepfake(image_path, include_visualization=False)
     
-    print("\n📊 Results:")
+    print("\nResults:")
     print(f"   Authentic: {result['is_authentic']}")
     print(f"   Label: {result['label']}")
     print(f"   Confidence: {result['confidence']:.2%}")
@@ -100,12 +100,12 @@ def main():
     
     # Interpretation
     if result['is_authentic']:
-        print("✅ Image appears to be AUTHENTIC")
+        print("Image appears to be AUTHENTIC")
     else:
-        print("⚠️  Image appears to be a DEEPFAKE")
+        print("Image appears to be a DEEPFAKE")
     
     if result['confidence'] < 0.7:
-        print("⚠️  Low confidence - manual review recommended")
+        print("Low confidence - manual review recommended")
 
 
 if __name__ == "__main__":
