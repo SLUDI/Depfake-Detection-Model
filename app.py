@@ -63,7 +63,7 @@ try:
     TIMM_AVAILABLE = True
 except ImportError:
     TIMM_AVAILABLE = False
-    print("⚠️  timm library not available, will try direct checkpoint loading")
+    print("timm library not available, will try direct checkpoint loading")
 
 # Load the model directly from checkpoint
 # The checkpoint contains a complete timm EfficientNetB4 model
@@ -77,7 +77,7 @@ HF_TOKEN = os.getenv("HF_TOKEN")  # Optional: HF token for private repos
 # Download model from HuggingFace Hub if configured
 if HF_MODEL_REPO and not os.path.exists(MODEL_LOCAL_PATH):
     os.makedirs(os.path.dirname(MODEL_LOCAL_PATH), exist_ok=True)
-    print(f"📥 Downloading model from HuggingFace Hub: {HF_MODEL_REPO}")
+    print(f"Downloading model from HuggingFace Hub: {HF_MODEL_REPO}")
     hf_hub_download(
         repo_id=HF_MODEL_REPO,
         filename=os.path.basename(MODEL_LOCAL_PATH),
@@ -86,8 +86,8 @@ if HF_MODEL_REPO and not os.path.exists(MODEL_LOCAL_PATH):
     )
 
 # --- LOAD MODEL ---
-print(f"🔧 Loading model from: {MODEL_LOCAL_PATH}")
-print(f"🖥️  Using device: {DEVICE}")
+print(f"Loading model from: {MODEL_LOCAL_PATH}")
+print(f"Using device: {DEVICE}")
 
 if not os.path.exists(MODEL_LOCAL_PATH):
     raise FileNotFoundError(
@@ -104,7 +104,7 @@ try:
         raise ImportError("timm library is required but not installed. Install with: pip install timm")
     
     # Create timm EfficientNetB4 model
-    print("📦 Creating EfficientNetB4 model with timm...")
+    print("Creating EfficientNetB4 model with timm...")
     model = timm.create_model('efficientnet_b4', pretrained=False, num_classes=1)
     
     # Load the checkpoint weights
@@ -122,31 +122,31 @@ try:
     model.load_state_dict(state_dict, strict=False)
     model = model.to(DEVICE)
     
-    print("✅ Model loaded successfully!")
+    print("Model loaded successfully!")
 except Exception as e:
-    print(f"❌ Error loading model: {e}")
+    print(f"Error loading model: {e}")
     raise
 
 
 model.eval()
 
 # --- LOAD FACENET MODEL FOR FACE VERIFICATION ---
-logger.info("📦 Loading FaceNet model for face verification...")
+logger.info("Loading FaceNet model for face verification...")
 try:
     facenet_model = InceptionResnetV1(pretrained=config.FACENET_MODEL, device=DEVICE).eval()
-    logger.info("✅ FaceNet (InceptionResnetV1) loaded successfully!")
+    logger.info("FaceNet (InceptionResnetV1) loaded successfully!")
 except Exception as e:
-    logger.warning(f"⚠️ FaceNet model loading failed: {e}")
+    logger.warning(f"FaceNet model loading failed: {e}")
     logger.warning("Face verification endpoints will be disabled")
     facenet_model = None
 
 # --- INITIALIZE VIDEO PROCESSOR ---
-logger.info("🎥 Initializing optimized video processor...")
+logger.info("Initializing optimized video processor...")
 try:
     video_processor = OptimizedVideoProcessor(device=DEVICE)
-    logger.info("✅ Video processor initialized!")
+    logger.info("Video processor initialized!")
 except Exception as e:
-    logger.warning(f"⚠️ Video processor initialization failed: {e}")
+    logger.warning(f"Video processor initialization failed: {e}")
     logger.warning("Video-based verification will be disabled")
     video_processor = None
 
@@ -160,9 +160,9 @@ if ENABLE_GRADCAM:
         # timm EfficientNet structure: blocks -> conv_head -> global_pool -> classifier
         target_layers = [model.conv_head]
         cam = GradCAM(model=model, target_layers=target_layers)
-        logger.info("✅ Grad-CAM visualization enabled")
+        logger.info("Grad-CAM visualization enabled")
     except Exception as e:
-        logger.warning(f"⚠️ Grad-CAM initialization failed: {e}")
+        logger.warning(f"Grad-CAM initialization failed: {e}")
         ENABLE_GRADCAM = False
 
 # --- IMAGE PREPROCESSING ---
@@ -410,7 +410,7 @@ async def predict_legacy(file: UploadFile = File(...)):
         
         frames_380 = video_result['frames_380x380']
         num_frames = frames_380.shape[0]
-        logger.info(f"✅ Extracted {num_frames} frames for deepfake analysis")
+        logger.info(f"Extracted {num_frames} frames for deepfake analysis")
         
         # Run deepfake detection on all frames
         with torch.no_grad():
@@ -477,13 +477,13 @@ async def predict_legacy(file: UploadFile = File(...)):
                 response["gradcam_frame_index"] = most_suspicious_idx
                 response["gradcam_frame_probability"] = round(max_prob_fake, 4)
             except Exception as e:
-                logger.warning(f"⚠️ Grad-CAM generation failed: {e}")
+                logger.warning(f"Grad-CAM generation failed: {e}")
         
-        logger.info(f"✅ Video deepfake detection complete: {predicted_class} ({confidence:.4f})")
+        logger.info(f"Video deepfake detection complete: {predicted_class} ({confidence:.4f})")
         return response
     
     except Exception as e:
-        logger.error(f"❌ Predict error: {str(e)}")
+        logger.error(f"Predict error: {str(e)}")
         return JSONResponse(
             status_code=500, 
             content={"error": f"Processing error: {str(e)}"}
@@ -547,7 +547,7 @@ async def extract_features(file: UploadFile = File(...)):
         tmp_path = tmp.name
 
     try:
-        logger.info(f"📹 Extracting features from: {file.filename}")
+        logger.info(f"Extracting features from: {file.filename}")
 
         # Run video processing
         video_result = video_processor.process_video(
@@ -577,7 +577,7 @@ async def extract_features(file: UploadFile = File(...)):
             embeddings = F.normalize(embeddings, p=2, dim=1)
             avg_embedding = embeddings.mean(dim=0).cpu().numpy()  # float64 by default
 
-        logger.info(f"✅ Extracted embedding from {video_result['num_faces']} faces")
+        logger.info(f"Extracted embedding from {video_result['num_faces']} faces")
 
         # Convert to float32 for smaller storage
         embedding_float32 = avg_embedding.astype(np.float32)
@@ -663,7 +663,7 @@ async def verify_two_videos(
                     tmp.write(content)
                     temp_files.append(tmp.name)
             
-            logger.info(f"📹 Comparing videos: {file1.filename} vs {file2.filename}")
+            logger.info(f"Comparing videos: {file1.filename} vs {file2.filename}")
             
             # Process both videos
             embeddings = []
@@ -701,7 +701,7 @@ async def verify_two_videos(
             
             result = "same_person" if is_match else "different_person"
             
-            logger.info(f"✅ Comparison complete. Similarity: {similarity:.4f}, Result: {result}")
+            logger.info(f"Comparison complete. Similarity: {similarity:.4f}, Result: {result}")
             
             return {
                 "success": True,
@@ -825,7 +825,7 @@ async def verify_with_embedding(
     # VALIDATION
     
     if not video_processor or not facenet_model:
-        logger.error("❌ Required models not loaded")
+        logger.error("Required models not loaded")
         raise HTTPException(
             status_code=503,
             detail="Video verification system not available. Required models not loaded."
@@ -834,7 +834,7 @@ async def verify_with_embedding(
     try:
         # Validate file type
         if not file.content_type.startswith('video/') and not file.filename.lower().endswith(('.mp4', '.avi', '.mov', '.mkv')):
-            logger.warning(f"⚠️ Invalid file type: {file.content_type}")
+            logger.warning(f"Invalid file type: {file.content_type}")
             raise HTTPException(
                 status_code=400,
                 detail=f"Only video files supported. Got: {file.content_type}"
@@ -858,15 +858,15 @@ async def verify_with_embedding(
                     detail=f"Invalid embedding dimension. Expected 512 floats, got {stored_emb.shape[0]}"
                 )
         
-            logger.info(f"✅ Loaded stored embedding from Base64, shape={stored_emb.shape}")
+            logger.info(f"Loaded stored embedding from Base64, shape={stored_emb.shape}")
         
         except Exception as e:
-            logger.error(f"❌ Error decoding embedding: {e}")
+            logger.error(f"Error decoding embedding: {e}")
             raise HTTPException(status_code=400, detail=f"Invalid Base64 embedding: {e}")
         
         # Validate embedding dimensions
         if len(stored_emb) != 512:
-            logger.error(f"❌ Invalid embedding dimension: {len(stored_emb)}")
+            logger.error(f"Invalid embedding dimension: {len(stored_emb)}")
             raise HTTPException(
                 status_code=400,
                 detail=f"Embedding must be 512-dimensional, got: {len(stored_emb)}"
@@ -874,13 +874,13 @@ async def verify_with_embedding(
         
         # Validate threshold
         if not 0.0 <= threshold <= 1.0:
-            logger.error(f"❌ Invalid threshold: {threshold}")
+            logger.error(f"Invalid threshold: {threshold}")
             raise HTTPException(
                 status_code=400,
                 detail="Threshold must be between 0.0 and 1.0"
             )
         
-        logger.info(f"✅ All validations passed")
+        logger.info(f"All validations passed")
         logger.info(f"   - File: {file.filename}")
         logger.info(f"   - Embedding: 512-dimensional")
         logger.info(f"   - Threshold: {threshold}")
@@ -888,7 +888,7 @@ async def verify_with_embedding(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"❌ Validation error: {e}")
+        logger.error(f"Validation error: {e}")
         raise HTTPException(status_code=400, detail=str(e))
     
     # SAVE VIDEO TEMPORARILY
@@ -898,16 +898,16 @@ async def verify_with_embedding(
         with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as tmp:
             content = await file.read()
             if len(content) == 0:
-                logger.error("❌ Empty video file")
+                logger.error("Empty video file")
                 raise HTTPException(status_code=400, detail="Empty video file")
             
             tmp.write(content)
             tmp_path = tmp.name
-            logger.info(f"✅ Video saved temporarily: {tmp_path} ({len(content)} bytes)")
+            logger.info(f"Video saved temporarily: {tmp_path} ({len(content)} bytes)")
         
         # STEP 1: VIDEO PROCESSING (Extract frames & faces)
         
-        logger.info(f"🎬 Processing video: {file.filename}")
+        logger.info(f"Processing video: {file.filename}")
         processing_start = time.time()
         
         video_result = video_processor.process_video(
@@ -918,18 +918,18 @@ async def verify_with_embedding(
         )
         
         processing_time = (time.time() - processing_start) * 1000
-        logger.info(f"✅ Video processed in {processing_time:.2f}ms")
+        logger.info(f"Video processed in {processing_time:.2f}ms")
         logger.info(f"   - Video result keys: {list(video_result.keys())}")
         logger.info(f"   - Faces detected: {video_result.get('num_faces', 'N/A')}")
         
         # STEP 2: LIVENESS CHECK (Optional)
         
         if config.ENABLE_LIVENESS:
-            logger.info(f"👁️  Checking liveness (blinks required: {config.MIN_BLINKS_FOR_LIVENESS})...")
+            logger.info(f"Checking liveness (blinks required: {config.MIN_BLINKS_FOR_LIVENESS})...")
             if not video_result['liveness_passed']:
                 total_time = (time.time() - start_time) * 1000
                 logger.warning(
-                    f"❌ LIVENESS FAILED! Blinks detected: {video_result['total_blinks']} "
+                    f"LIVENESS FAILED! Blinks detected: {video_result['total_blinks']} "
                     f"(required: {config.MIN_BLINKS_FOR_LIVENESS})"
                 )
                 
@@ -951,14 +951,14 @@ async def verify_with_embedding(
                     }
                 }
             
-            logger.info(f"✅ Liveness check passed ({video_result['total_blinks']} blinks detected)")
+            logger.info(f"Liveness check passed ({video_result['total_blinks']} blinks detected)")
         
         # STEP 3: CHECK FOR FACES
         
         if video_result['faces_160x160'] is None or video_result['frames_380x380'] is None:
             total_time = (time.time() - start_time) * 1000
             error_msg = video_result.get('error', "No faces detected in video")
-            logger.error(f"❌ {error_msg}")
+            logger.error(f"{error_msg}")
             
             raise HTTPException(
                 status_code=400,
@@ -968,13 +968,13 @@ async def verify_with_embedding(
         faces_160 = video_result['faces_160x160']
         frames_380 = video_result['frames_380x380']
         
-        logger.info(f"✅ Face data retrieved")
+        logger.info(f"Face data retrieved")
         logger.info(f"   - 160x160 faces: {faces_160.shape}")
         logger.info(f"   - 380x380 frames: {frames_380.shape}")
         
         # STEP 4: DEEPFAKE DETECTION (Early Exit if Fake)
         
-        logger.info(f"🔍 Running deepfake detection (Full Frame Analysis)...")
+        logger.info(f"Running deepfake detection (Full Frame Analysis)...")
         deepfake_start = time.time()
         
         with torch.no_grad():
@@ -997,7 +997,7 @@ async def verify_with_embedding(
             'num_faces_analyzed': int(len(probabilities))
         }
         
-        logger.info(f"✅ Deepfake detection complete")
+        logger.info(f"Deepfake detection complete")
         logger.info(f"   - Is Authentic: {is_authentic}")
         logger.info(f"   - Probability (Fake): {avg_prob_fake:.4f}")
         logger.info(f"   - Probability (Real): {1.0 - avg_prob_fake:.4f}")
@@ -1009,7 +1009,7 @@ async def verify_with_embedding(
         if not is_authentic:
             total_time = (time.time() - start_time) * 1000
             
-            logger.warning(f"⚠️ DEEPFAKE DETECTED! Probability: {avg_prob_fake:.4f}")
+            logger.warning(f"DEEPFAKE DETECTED! Probability: {avg_prob_fake:.4f}")
             logger.warning(f"   Stopping verification pipeline - returning early exit")
             
             return {
@@ -1029,11 +1029,11 @@ async def verify_with_embedding(
                 }
             }
         
-        logger.info(f"✅ Deepfake check passed!")
+        logger.info(f"Deepfake check passed!")
         
         # STEP 5: FACE VERIFICATION (Only if deepfake check passed)
         
-        logger.info(f"🔐 Running face verification...")
+        logger.info(f"Running face verification...")
         verification_start = time.time()
         
         # Extract embeddings
@@ -1042,7 +1042,7 @@ async def verify_with_embedding(
             embeddings = F.normalize(embeddings, p=2, dim=1)
             avg_embedding = embeddings.mean(dim=0).cpu().numpy()
         
-        logger.info(f"✅ Embeddings extracted and normalized")
+        logger.info(f"Embeddings extracted and normalized")
         logger.info(f"   - Number of face embeddings: {len(embeddings)}")
         
         # EMBEDDING NORMALIZATION (CRITICAL!)
@@ -1050,34 +1050,34 @@ async def verify_with_embedding(
         # SMART NORMALIZATION: Prevent double normalization issues
         # Check if stored embedding is already normalized using helper function
         stored_emb_norm_value = np.linalg.norm(stored_emb)
-        logger.info(f"📊 Stored embedding normalization check")
+        logger.info(f"Stored embedding normalization check")
         logger.info(f"   - Original norm: {stored_emb_norm_value:.6f}")
         
         if is_normalized(stored_emb, tolerance=0.01):
-            logger.info(f"✅ Stored embedding already normalized (norm={stored_emb_norm_value:.6f}), using as-is")
+            logger.info(f"Stored embedding already normalized (norm={stored_emb_norm_value:.6f}), using as-is")
             stored_emb_normalized = stored_emb
         else:
-            logger.info(f"🔧 Stored embedding NOT normalized (norm={stored_emb_norm_value:.6f}), applying normalization")
+            logger.info(f"Stored embedding NOT normalized (norm={stored_emb_norm_value:.6f}), applying normalization")
             stored_emb_normalized = stored_emb / stored_emb_norm_value
         
         # Extracted embedding: mean of normalized vectors may not be normalized
         # Always check and normalize if needed
         avg_embedding_norm = np.linalg.norm(avg_embedding)
-        logger.info(f"📊 Extracted embedding normalization check")
+        logger.info(f"Extracted embedding normalization check")
         logger.info(f"   - Norm after averaging: {avg_embedding_norm:.6f}")
         
         if avg_embedding_norm > 0:
             if is_normalized(avg_embedding, tolerance=0.01):
-                logger.info(f"✅ Extracted embedding already normalized, using as-is")
+                logger.info(f"Extracted embedding already normalized, using as-is")
                 avg_embedding_normalized = avg_embedding
             else:
-                logger.info(f"🔧 Extracted embedding NOT normalized, applying normalization")
+                logger.info(f"Extracted embedding NOT normalized, applying normalization")
                 avg_embedding_normalized = avg_embedding / avg_embedding_norm
         else:
-            logger.error(f"❌ Extracted embedding has zero norm!")
+            logger.error(f"Extracted embedding has zero norm!")
             raise Exception("Invalid embedding norm")
         
-        logger.info(f"✅ Final normalization status")
+        logger.info(f"Final normalization status")
         logger.info(f"   - Stored embedding norm: {np.linalg.norm(stored_emb_normalized):.6f}")
         logger.info(f"   - Extracted embedding norm: {np.linalg.norm(avg_embedding_normalized):.6f}")
         
@@ -1089,7 +1089,7 @@ async def verify_with_embedding(
         
         verification_time = (time.time() - verification_start) * 1000
         
-        logger.info(f"✅ Face verification complete")
+        logger.info(f"Face verification complete")
         logger.info(f"   - Similarity: {similarity:.4f}")
         logger.info(f"   - Threshold: {threshold}")
         logger.info(f"   - Is Match: {is_match}")
@@ -1099,12 +1099,12 @@ async def verify_with_embedding(
         total_time = (time.time() - start_time) * 1000
         
         if is_match:
-            logger.info(f"✅ VERIFICATION SUCCESSFUL!")
+            logger.info(f"VERIFICATION SUCCESSFUL!")
             result_status = "verified"
             result_message = "All checks passed. User authenticated successfully."
             success = True
         else:
-            logger.warning(f"❌ FACE MISMATCH! Similarity: {similarity:.4f}")
+            logger.warning(f"FACE MISMATCH! Similarity: {similarity:.4f}")
             result_status = "face_mismatch"
             result_message = "Face does not match stored embedding. Authentication failed."
             success = False
@@ -1137,7 +1137,7 @@ async def verify_with_embedding(
             }
         }
         
-        logger.info(f"📊 Final response compiled:")
+        logger.info(f"Final response compiled:")
         logger.info(f"   - Success: {success}")
         logger.info(f"   - Result: {result_status}")
         logger.info(f"   - Total time: {total_time:.2f}ms")
@@ -1147,7 +1147,7 @@ async def verify_with_embedding(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"❌ Verification error: {str(e)}", exc_info=True)
+        logger.error(f"Verification error: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=500,
             detail=f"Internal server error: {str(e)}"
@@ -1158,20 +1158,20 @@ async def verify_with_embedding(
         if tmp_path and os.path.exists(tmp_path):
             try:
                 os.remove(tmp_path)
-                logger.info(f"🧹 Temporary file cleaned up: {tmp_path}")
+                logger.info(f"Temporary file cleaned up: {tmp_path}")
             except Exception as e:
-                logger.warning(f"⚠️ Failed to cleanup temp file: {e}")
+                logger.warning(f"Failed to cleanup temp file: {e}")
 
 # Startup event
 @app.on_event("startup")
 async def startup_event():
     logger.info("="*60)
-    logger.info("🚀 Unified Deepfake Detection & Face Verification API Started")
-    logger.info(f"📦 Deepfake Model: EfficientNetB4")
-    logger.info(f"🔐 Face Verification Model: {'FaceNet (InceptionResnetV1)' if facenet_model else 'Disabled'}")
-    logger.info(f"🖥️  Device: {DEVICE}")
-    logger.info(f"🎨 Grad-CAM: {'Enabled' if ENABLE_GRADCAM else 'Disabled'}")
-    logger.info(f"👁️  Liveness Detection: {'Enabled' if config.ENABLE_LIVENESS else 'Disabled'}")
+    logger.info("Unified Deepfake Detection & Face Verification API Started")
+    logger.info(f"Deepfake Model: EfficientNetB4")
+    logger.info(f"Face Verification Model: {'FaceNet (InceptionResnetV1)' if facenet_model else 'Disabled'}")
+    logger.info(f"Device: {DEVICE}")
+    logger.info(f"Grad-CAM: {'Enabled' if ENABLE_GRADCAM else 'Disabled'}")
+    logger.info(f"Liveness Detection: {'Enabled' if config.ENABLE_LIVENESS else 'Disabled'}")
     logger.info("="*60)
 
 if __name__ == "__main__":
