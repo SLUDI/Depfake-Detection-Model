@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Model files - Temporarily allowing for Git LFS upload
+# model/*.pt
+# model/*.pth
+# model/*.onnx
+# *.pt
+# *.pth
+# *.onnx
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.gitattributes
+
+# Tests
+tests/
+test_*.py
+*_test.py
+test_image.jpg
+test_image.png
+
+# Misc
+.DS_Store
+*.log
+.env
+.env.local

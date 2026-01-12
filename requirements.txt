@@ -1,0 +1,42 @@
+# Deepfake Detection & Face Verification API - Requirements
+
+# Core Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+
+# Deep Learning
+torch==2.1.0
+torchvision==0.16.0
+timm==0.9.12  # Required for EfficientNetB4 model
+
+# Face Recognition & Verification
+facenet-pytorch==2.5.3  # FaceNet for face verification
+scipy==1.11.4  # For distance calculations
+
+# Liveness Detection
+mediapipe==0.10.8  # For facial landmark detection and blink detection
+
+# Image Processing
+pillow==10.1.0
+numpy==1.24.3
+opencv-python-headless==4.8.1.78
+
+# Model Visualization (Grad-CAM)
+grad-cam==1.5.3
+
+# Model Management
+huggingface-hub==0.19.4
+
+# Optional: ONNX for optimized inference (uncomment if using ONNX)
+# onnx==1.15.0
+# onnxruntime==1.16.3
+
+# Optional: Performance monitoring
+# prometheus-client==0.19.0
+
+# Development (uncomment for local development)
+# pytest==7.4.3
+# httpx==0.25.2
+# black==23.12.0
+# flake8==6.1.0

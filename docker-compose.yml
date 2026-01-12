@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  deepfake-detector:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: deepfake_app
+    ports:
+      - "8081:8080"
+    environment:
+      # Model Configuration
+      - DEEPFAKE_MODEL_PATH=/app/model/effb4_ai_detector.pt
+      
+      # Detection Thresholds
+      - DEEPFAKE_THRESHOLD=0.5
+      - VERIFICATION_THRESHOLD=0.6
+      - DEEPFAKE_HIGH_CONFIDENCE=0.8
+      
+      # Video Processing
+      - FRAME_INTERVAL=5
+      - MAX_FACES=30
+      - BATCH_SIZE=8
+      
+      # Feature Flags
+      - ENABLE_GRADCAM=true
+      - ENABLE_LIVENESS=false
+      - ENABLE_DEEPFAKE_CHECK=true
+      - ENABLE_EARLY_EXIT=true
+      - USE_GPU=true
+    volumes:
+      # Persist model cache between container restarts
+      - model-cache:/app/.cache
+      # Mount model directory (optional - for development)
+      # - ./model:/app/model:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8080/health')"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+        reservations:
+          memory: 4G
+          # Uncomment below for GPU support with NVIDIA runtime
+          # devices:
+          #   - driver: nvidia
+          #     count: 1
+          #     capabilities: [gpu]
+
+volumes:
+  model-cache:
+    driver: local
