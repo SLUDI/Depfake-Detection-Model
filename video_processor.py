@@ -54,7 +54,7 @@ class OptimizedVideoProcessor:
             ),
         ])
         
-        logger.info("✅ Optimized video processor initialized")
+        logger.info("Optimized video processor initialized")
     
     def _calculate_ear(self, eye_points: np.ndarray) -> float:
         """Calculate Eye Aspect Ratio for blink detection"""
@@ -144,7 +144,7 @@ class OptimizedVideoProcessor:
                             else:
                                 if eye_closed_counter >= config.CONSECUTIVE_FRAMES:
                                     total_blinks += 1
-                                    logger.info(f"✅ Blink detected! Total: {total_blinks}")
+                                    logger.info(f"Blink detected! Total: {total_blinks}")
                                 eye_closed_counter = 0
                             
                             if total_blinks >= config.MIN_BLINKS_FOR_LIVENESS:
