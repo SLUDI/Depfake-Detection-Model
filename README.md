@@ -1,14 +1,3 @@
----
-title: Deepfake Detection API
-emoji: 🔍
-colorFrom: blue
-colorTo: purple
-sdk: docker
-app_port: 8080
-pinned: false
-license: mit
-short_description: Production-ready deepfake detection using EfficientNetB4
----
 
 # Deepfake Detection API
 
@@ -242,15 +231,6 @@ async def create_did_with_verification(user_image):
     return did
 ```
 
-## 📊 Performance Benchmarks
-
-| Deployment | Avg Response Time | Cold Start | Cost/Month |
-|------------|------------------|------------|------------|
-| Local (CPU) | 800ms | N/A | $0 |
-| Cloud Run (2 vCPU) | 250ms | 5s | $15-30 |
-| Cloud Run (GPU) | 100ms | 10s | $80-150 |
-| AWS Lambda | 300ms | 8s | $20-40 |
-
 ## 🧪 Testing
 
 ```bash
@@ -270,27 +250,6 @@ curl http://localhost:8080/health
 - **Parameters**: ~19M
 - **Model Size**: ~70MB
 - **Training**: Fine-tuned on deepfake dataset
-
-## 🔄 Future Enhancements
-
-- [ ] ONNX model support for 2-3x faster inference
-- [ ] Video deepfake detection
-- [ ] Real-time liveness detection
-- [ ] Batch processing support
-- [ ] Model quantization (INT8) for mobile deployment
-- [ ] Prometheus metrics integration
-
-## 📄 License
-
-MIT License - See LICENSE file for details
-
-## 🤝 Contributing
-
-Contributions welcome! Please open an issue or submit a PR.
-
-## 📧 Support
-
-For issues or questions, please open a GitHub issue.
 
 ---
 
